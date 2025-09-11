@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import analyzeRoutes from "./routes/analyzeRoutes.js";
+import analyzeRoutes from "./routes/image-understanding.routes.js";
 
 dotenv.config();
 const app = express();

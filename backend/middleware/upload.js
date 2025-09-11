@@ -1,6 +1,6 @@
-import multer from "multer";
+import multer from 'multer'
+const upload = multer({ dest: 'uploads/' });
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
-export default upload;
+app.post('/uploads', upload.any(), (req, res) => {
+  res.send('File uploaded!');
+});
