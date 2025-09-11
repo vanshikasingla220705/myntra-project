@@ -1,6 +1,15 @@
-import express from "express"
-const app=express()
-const PORT=5000
-app.listen(PORT,()=>{
-    console.log(`erhuegbhegtbrunijgtihthning on ${PORT}`)
-}) 
+import express from "express";
+import dotenv from "dotenv";
+import analyzeRoutes from "./routes/analyzeRoutes.js";
+
+dotenv.config();
+const app = express();
+
+app.use(express.json());
+
+// Routes
+app.use("/api", analyzeRoutes);
+
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
+});
