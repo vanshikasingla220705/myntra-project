@@ -76,7 +76,7 @@ Example output (JSON format only):
     let geminiResponse;
     try {
       geminiResponse = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: 'gemini-1.5-flash',
         contents: createUserContent([ finalPrompt, ...partsFromUri ])
       });
     } catch (primaryErr) {
