@@ -116,7 +116,7 @@ Example output (JSON format only):
     const pipeline = [
       {
         $vectorSearch: {
-          index: 'vector_index_desc2',
+          index: 'vector_index_desc',
           path: 'description_embedding',
           queryVector: queryVector,
           numCandidates: 150,
