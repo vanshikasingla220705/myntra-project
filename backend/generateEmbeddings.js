@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import axios from "axios";
 import dotenv from "dotenv";
-import {Product} from "./models/productModel.js"; // Adjust the path to your product model if needed
+import {Decor} from "./models/decorModel.js"; // Adjust the path to your product model if needed
 
 dotenv.config(); // Load environment variables from a .env file
 
@@ -37,7 +37,7 @@ const processProducts = async () => {
   console.log("MongoDB connected successfully.");
 
   // Find all products that do NOT have the 'description_embedding' field yet
-  const productsToProcess = await Product.find({
+  const productsToProcess = await Decor.find({
     description_embedding: { $exists: false },
     description: { $exists: true, $ne: null } // Ensure description exists and is not null
   });
@@ -60,7 +60,7 @@ const processProducts = async () => {
 
     if (vector) {
       // If we got a vector, update the product in the database
-      await Product.updateOne(
+      await Decor.updateOne(
         { _id: product._id },
         { $set: { description_embedding: vector } }
       );

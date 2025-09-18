@@ -2,7 +2,7 @@
 
 import mongoose, {Schema} from "mongoose";
 
-const productSchema = new Schema(
+const decorSchema = new Schema(
     {
         // --- CHANGE THIS LINE ---
         item_name: { // Changed from "item" to "item_name"
@@ -25,7 +25,7 @@ const productSchema = new Schema(
             type: [Number],
             required: false 
         },
-    },{collection:'myntra'}
+    },{collection:'myntra2'}
 );
 
-export const Product = mongoose.model("Product", productSchema,"myntra");
+export const Decor = mongoose.model("Decor", decorSchema,"myntra2");
