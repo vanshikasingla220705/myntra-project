@@ -154,6 +154,7 @@ Example output (JSON format only):
           item_name: 1, // Or title, whichever you use
           price: 1,
           image_url: 1,
+          description:1,
           score: { $meta: 'vectorSearchScore' }, // The similarity score from the search
         },
       },
