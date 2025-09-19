@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GoogleGenAI, createUserContent } from "@google/genai";
 import { Product } from "../models/productModel.js"; // Your Mongoose model for CLOTHING
-import { Decor } from "../models/decorModel.js";     // NEW: Your Mongoose model for DECOR
+import { Decor } from "../models/decorModel.js";     // Your Mongoose model for DECOR
 
 // Initialize the Generative AI client
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -22,8 +22,8 @@ const getVectorEmbedding = async (text) => {
 
 
 /**
- * Analyzes a text query, classifies it as 'clothing' or 'decor', gets recommendations,
- * and finds matching items in the correct database collection using vector search.
+ * Analyzes a text query, gets recommendations, and finds matching items
+ * by performing multiple parallel searches and combining the results.
  */
 export const getTextBasedRecommendations = async (req, res) => {
   try {
@@ -36,9 +36,7 @@ export const getTextBasedRecommendations = async (req, res) => {
       });
     }
 
-    // 2. GET RECOMMENDATIONS & CATEGORY FROM GEMINI
-    // --- MODIFIED PROMPT ---
-    // The prompt now explicitly asks the AI to classify the query and provides examples for both.
+    // 2. GET RECOMMENDATIONS & CATEGORY FROM GEMINI (No changes here)
     const generationPrompt = `
 Analyze the user's request.
 1. First, classify the query's intent into ONE of two categories: "clothing" or "decor".
@@ -103,8 +101,7 @@ Example output 2 (JSON format only):
       });
     }
 
-    // --- NEW: DYNAMIC MODEL SELECTION ---
-    // We select the database model based on the category returned by the AI.
+    // DYNAMIC MODEL SELECTION (No changes here)
     const { category, recommendations } = parsed;
     let searchModel;
 
@@ -115,7 +112,6 @@ Example output 2 (JSON format only):
       searchModel = Decor;
       console.log("✅ Category identified: Decor. Searching in 'Decor' collection.");
     } else {
-      // Handle cases where the AI returns an unknown or missing category
       return res.status(400).json({
           success: false,
           error: `AI returned an unsupported category: '${category}'. Cannot perform search.`,
@@ -123,36 +119,61 @@ Example output 2 (JSON format only):
       });
     }
 
-    // 3. VECTORIZE THE FIRST RECOMMENDATION (No changes here)
-    const recommendationToSearch = recommendations[0];
-    const queryVector = await getVectorEmbedding(recommendationToSearch);
+    // --- THIS IS THE ONLY SECTION THAT HAS BEEN CHANGED ---
+    // Perform parallel searches and combine the results into a single list.
 
-    // 4. PERFORM VECTOR SEARCH IN THE CORRECT COLLECTION
-    const pipeline = [{
-      $vectorSearch: {
-        index: 'vector_index_desc', // IMPORTANT: Ensure both collections have a vector index with this name
-        path: 'description_embedding', // The field containing the vectors
-        queryVector: queryVector,
-        numCandidates: 150,
-        limit: 10,
-      },
-    }, {
-      $project: {
-        _id: 1, item_name: 1, price: 1, image_url: 1, description: 1,
-        score: { $meta: 'vectorSearchScore' },
-      },
-    }];
+    console.log("✅ Performing a separate search for each AI recommendation...");
 
-    // --- MODIFIED: Use the dynamically selected model for the query ---
-    const recommendedItems = await searchModel.aggregate(pipeline);
-
-    // 5. SEND FINAL RESPONSE (No changes here, but the payload is now dynamic)
-    res.json({
-      success: true,
-      geminiRaw: rawText,
-      analysis: parsed, // The `analysis` object now includes the category
-      recommendedProducts: recommendedItems
+    const searchTasks = recommendations.map(async (searchTerm) => {
+        try {
+            const queryVector = await getVectorEmbedding(searchTerm);
+            const pipeline = [{
+                $vectorSearch: {
+                    index: 'vector_index_desc',
+                    path: 'description_embedding',
+                    queryVector: queryVector,
+                    numCandidates: 100,
+                    limit: 4, // Get top 4 results for EACH term
+                },
+            }, {
+                $project: { _id: 1, item_name: 1, price: 1, image_url: 1, description: 1 },
+            }];
+            return searchModel.aggregate(pipeline);
+        } catch (err) {
+            console.error(`Failed to search for term "${searchTerm}":`, err);
+            return []; // Return empty array on failure
+        }
     });
+
+    // Wait for all searches to complete
+    const resultsFromAllSearches = await Promise.all(searchTasks);
+
+    // Combine all results into a single flat array
+    const combinedProducts = resultsFromAllSearches.flat();
+
+    // Remove duplicate products that may appear in multiple search results
+    const uniqueProducts = [];
+    const seenIds = new Set();
+    for (const product of combinedProducts) {
+      // Mongoose returns _id as an object, so we convert it to a string for comparison
+      const productId = product._id.toString();
+      if (!seenIds.has(productId)) {
+        seenIds.add(productId);
+        uniqueProducts.push(product);
+      }
+    }
+    
+    console.log(`✅ Combined and deduplicated results. Found ${uniqueProducts.length} unique products.`);
+
+    // 5. SEND THE FINAL COMBINED RESPONSE
+    res.json({
+        success: true,
+        geminiRaw: rawText,
+        analysis: parsed,
+        // The key is back to 'recommendedProducts' with a flat, unique list
+        recommendedProducts: uniqueProducts
+    });
+    // --- END OF CHANGED SECTION ---
 
   } catch (err) {
     console.error("Multi-category search error:", err);
