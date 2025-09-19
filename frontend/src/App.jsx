@@ -5,6 +5,7 @@ import ImageAnalyzerPage from './pages/ImageAnalyzerPage';
 import RecommendationsPage from './pages/RecommendationsPage';
 import MixAndMatchPage from './pages/MixAndMatchPage';
 import CartStylingPage from './pages/CartStylingPage';
+import ContestPage from './pages/ContestPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/recommendations" element={<RecommendationsPage />} />
           <Route path="/mix-and-match" element={<MixAndMatchPage />} />
           <Route path="/cart-styling" element={<CartStylingPage />} />
+          <Route path="/contest" element={<ContestPage />}/>
         </Routes>
       </main>
     </div>
