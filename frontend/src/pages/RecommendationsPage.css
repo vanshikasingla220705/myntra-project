@@ -60,3 +60,22 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
+
+/* ADD THIS TO src/pages/RecommendationsPage.css */
+
+.uploaded-images-container {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem; /* Adds space between the uploaded images */
+  flex-wrap: wrap; /* Allows images to wrap on smaller screens */
+  margin-bottom: 1rem;
+}
+
+/* You might want to adjust the size of the uploaded images */
+.uploaded-image {
+  max-width: 250px; /* Adjust as needed */
+  max-height: 350px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  object-fit: cover;
+}
