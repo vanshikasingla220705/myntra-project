@@ -1,0 +1,19 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: calc(100vh - 120px); /* Full height minus navbar and padding */
+}
+
+.home-container h1 {
+  font-size: 3rem;
+  color: var(--secondary-color);
+}
+
+.home-container p {
+  font-size: 1.2rem;
+  color: #555;
+  max-width: 600px;
+}

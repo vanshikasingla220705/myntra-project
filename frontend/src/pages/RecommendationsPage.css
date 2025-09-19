@@ -1,0 +1,62 @@
+.recommendations-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+}
+
+.error-message, .info-message {
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+}
+
+.uploaded-image-section {
+  background: white;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  text-align: center;
+}
+
+.uploaded-image-section h2 {
+  margin-top: 0;
+  color: var(--secondary-color);
+}
+
+.uploaded-image {
+  max-width: 300px;
+  max-height: 400px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.mix-match-btn {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 10px 25px;
+    background-color: var(--secondary-color);
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.mix-match-btn:hover {
+    background-color: #41465c;
+}
+
+.recommendations-container h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--secondary-color);
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}

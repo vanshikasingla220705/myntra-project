@@ -1,0 +1,71 @@
+.cart-styling-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.cart-styling-container h1 {
+  text-align: center;
+  color: var(--secondary-color);
+  margin-bottom: 2rem;
+}
+
+.cart-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.cart-items-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  min-width: 300px;
+}
+
+.cart-item-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  text-align: center;
+  padding: 1rem;
+}
+
+.cart-item-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.tips-section {
+  flex: 1.5;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  min-width: 300px;
+}
+
+.tips-section h2 {
+  margin-top: 0;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.styling-tips h3 {
+  color: var(--secondary-color);
+  margin-top: 1.5rem;
+}
+
+.styling-tips ul {
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.styling-tips li::marker {
+  color: var(--primary-color);
+}
