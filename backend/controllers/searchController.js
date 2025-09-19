@@ -41,19 +41,11 @@ export const getTextBasedRecommendations = async (req, res) => {
 Analyze the user's request.
 1. First, classify the query's intent into ONE of two categories: "clothing" or "decor".
 2. Understand the user's context what user is trying to say
-like if the user is saying a party look give him the recommendations of skirts, pants, froks, heels, earingsetc.
 
-but if the user is asking for the traditional look 
-give him the things like golder kuta , sharara, juti, heels, bangles, lehenga, etc.
+3.if the category is clothing then just suggest the clothes related to that inquiry and also suggest 
+the footwear and accessories related to that. 
 
-do not just give the recommended text only in single word ::
-just define properly 
-eg. golden color saree, juttis, sahrara, kurtas and give 3-5 strings like that so the vector embedding could find as many items as possible of all categories
-
-also keep it same for western looks also 
-if the user is asking the western looks give him heels , dresses, earings
-
-3. Suggest ideal complementary items. The first recommendation should be the most prominent.
+4. Suggest ideal complementary items. The first recommendation should be the most prominent.
 5. if the category is decor please find that what the user is trying to ask for
 like if he is asking for table decoration give him lamps and vases and if the user is asking for wall decoration give him the products relatedd to wall decoration.
 
@@ -62,7 +54,7 @@ Example output 1 (JSON format only):
 {
   "category": "clothing",
   "context": "formal, winter, wedding",
-  "recommendations": ["black velvet blazer", "white silk blouse", "tailored wool trousers"]
+  "recommendations": ["black velvet blazer", "black high sandals", "golden earings"]
 }
 
 Example user query 2: "Help me find a centerpiece for my rustic dining room table."
