@@ -1,0 +1,25 @@
+.mix-and-match-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem; /* Adds space between the two panels */
+  padding: 1.5rem;
+  align-items: flex-start; /* Aligns panels to the top */
+}
+
+.recommendations-panel {
+  flex: 1; /* Takes up half the space */
+  max-width: 50%;
+  height: calc(100vh - 4rem); /* Adjust height as needed */
+  overflow-y: auto; /* Adds a scrollbar if recommendations are long */
+  padding-right: 1rem;
+  border-right: 1px solid #e0e0e0;
+}
+
+.studio-panel {
+  flex: 1; /* Takes up the other half of the space */
+}
+
+/* Optional: Make the recommendations grid a bit more compact */
+.recommendations-panel .recommendations-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}

@@ -9,7 +9,7 @@ dotenv.config();
 import multer from "multer"
 import axios from "axios"
 import FormData from 'form-data';
-const PYTHON_API_URL = 'http://localhost:8000';
+const PYTHON_API_URL = 'http://localhost:8001';
 const memoryUpload = multer({ storage: multer.memoryStorage() });
 // --- 2. CALL THE CONNECTION FUNCTION ---
 connectDB();

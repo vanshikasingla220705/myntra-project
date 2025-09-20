@@ -19,7 +19,6 @@ def load_checkpoint_for_api(model, checkpoint_path):
     
     model_state_dict = torch.load(checkpoint_path, map_location=torch.device("cpu"))
     
-    # Removes 'module.' prefix from model state dictionary keys if it exists
     if list(model_state_dict.keys())[0].startswith('module.'):
         new_state_dict = OrderedDict()
         for k, v in model_state_dict.items():
@@ -38,19 +37,37 @@ net = load_checkpoint_for_api(net, 'cloth_segm.pth')
 net.eval()
 
 # --- 2. API ENDPOINTS ---
+
+# --- MODIFIED SECTION ---
+# This helper function is now more robust.
 def handle_request(processing_function):
     """A helper function to avoid repeating code in each endpoint."""
-    if 'file' not in request.files: return jsonify({'error': 'No file part'}), 400
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
-    if file.filename == '': return jsonify({'error': 'No selected file'}), 400
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+        
     try:
         image_bytes = file.read()
         # Calls the specific processing logic for the endpoint
         segmented_image_bytes = processing_function(image_bytes, net)
+
+        # --- NEW CHECK ---
+        # If our processor fails (e.g., can't decode the image), it returns None.
+        # We catch that here and send a proper error instead of crashing.
+        if segmented_image_bytes is None:
+            print("Image processing failed, returning 500 error to client.")
+            return jsonify({'error': 'Image processing failed on the server. The image might be invalid or corrupted.'}), 500
+
         return send_file(segmented_image_bytes, mimetype='image/png')
+        
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return jsonify({'error': 'An internal error occurred.'}), 500
+        # This will catch any other unexpected errors.
+        print(f"An unhandled error occurred in handle_request: {e}")
+        return jsonify({'error': 'An internal server error occurred.'}), 500
+# --- END OF MODIFIED SECTION ---
+
 
 @app.route('/segment/top', methods=['POST'])
 def segment_top_endpoint():
@@ -84,4 +101,4 @@ def segment_lehenga_endpoint():
 
 # --- 3. RUN THE SERVER ---
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=8001, debug=True)
