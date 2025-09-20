@@ -4,7 +4,6 @@ import { useSearch } from '../context/SearchContext';
 import Loader from '../components/Loader';
 import ProductCard from '../components/ProductCard';
 import './RecommendationsPage.css';
-
 const RecommendationsPage = () => {
   const { searchResults, isLoading, error } = useSearch();
 
@@ -68,30 +67,11 @@ const RecommendationsPage = () => {
       {/* --- END OF CORRECTED SECTION --- */}
 
       {/* Logic for displaying grouped results */}
-      {groupedResults && groupedResults.length > 0 ? (
-        groupedResults.map((group, index) => (
-          group.products.length > 0 && (
-            <div key={index} className="recommendation-group">
-              <h2 className="group-title">
-                Recommendations for "{group.searchTerm}"
-              </h2>
-              <div className="recommendations-grid">
-                {group.products.map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                ))}
-              </div>
-            </div>
-          )
-        ))
-      // Fallback logic for displaying flat list of results
-      ) : recommendedProducts && recommendedProducts.length > 0 ? (
-        <div className="recommendation-group">
-          <h2 className="group-title">AI Recommendations</h2>
-          <div className="recommendations-grid">
-            {recommendedProducts.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
+       {recommendedProducts && recommendedProducts.length > 0 ? (
+        <div className="recommendations-grid">
+          {recommendedProducts.map((product) => (
+            <ProductCard key={product._id} product={product} />
+          ))}
         </div>
       ) : (
         <p className="info-message">{searchResults.message || "No products found."}</p>
