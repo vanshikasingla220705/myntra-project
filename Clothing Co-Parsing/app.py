@@ -3,6 +3,8 @@ from flask_cors import CORS
 import torch
 from collections import OrderedDict
 import os
+import requests # <--- ADD THIS IMPORT
+from io import BytesIO # <--- ADD THIS IMPORT
 
 # Import the model architecture and our universal processor
 from network import U2NET
@@ -12,6 +14,7 @@ from processor import process_image
 app = Flask(__name__)
 CORS(app)
 
+# ... (Your existing load_checkpoint_for_api function) ...
 def load_checkpoint_for_api(model, checkpoint_path):
     print(f"Loading checkpoints from: {checkpoint_path}")
     if not os.path.exists(checkpoint_path):
@@ -38,10 +41,35 @@ net.eval()
 
 # --- 2. API ENDPOINTS ---
 
-# --- MODIFIED SECTION ---
-# This helper function is now more robust.
+# --- NEW SECTION: IMAGE PROXY ---
+# This new route handles fetching images from website URLs
+@app.route('/proxy-image', methods=['GET'])
+def proxy_image():
+    # Get the image URL from the query parameters
+    image_url = request.args.get('url')
+    if not image_url:
+        return "URL parameter is missing", 400
+
+    try:
+        # Fetch the image from the external URL
+        # Set a user-agent to pretend we're a browser, which helps avoid blocks
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        response = requests.get(image_url, headers=headers, stream=True)
+        response.raise_for_status() # Raise an exception for bad status codes
+
+        # Return the image content with the correct content type
+        return send_file(
+            BytesIO(response.content),
+            mimetype=response.headers.get('Content-Type', 'image/png')
+        )
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching image via proxy: {e}")
+        return str(e), 500
+# --- END OF NEW SECTION ---
+
+
+# ... (Your existing handle_request helper function and all /segment/... endpoints) ...
 def handle_request(processing_function):
-    """A helper function to avoid repeating code in each endpoint."""
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
@@ -50,12 +78,8 @@ def handle_request(processing_function):
         
     try:
         image_bytes = file.read()
-        # Calls the specific processing logic for the endpoint
         segmented_image_bytes = processing_function(image_bytes, net)
 
-        # --- NEW CHECK ---
-        # If our processor fails (e.g., can't decode the image), it returns None.
-        # We catch that here and send a proper error instead of crashing.
         if segmented_image_bytes is None:
             print("Image processing failed, returning 500 error to client.")
             return jsonify({'error': 'Image processing failed on the server. The image might be invalid or corrupted.'}), 500
@@ -63,11 +87,8 @@ def handle_request(processing_function):
         return send_file(segmented_image_bytes, mimetype='image/png')
         
     except Exception as e:
-        # This will catch any other unexpected errors.
         print(f"An unhandled error occurred in handle_request: {e}")
         return jsonify({'error': 'An internal server error occurred.'}), 500
-# --- END OF MODIFIED SECTION ---
-
 
 @app.route('/segment/top', methods=['POST'])
 def segment_top_endpoint():
@@ -98,6 +119,7 @@ def segment_kurta_endpoint():
 def segment_lehenga_endpoint():
     print("Request for LEHENGA: using classes [1, 3]")
     return handle_request(lambda img, model: process_image(img, model, classes_to_keep=[1, 3]))
+
 
 # --- 3. RUN THE SERVER ---
 if __name__ == '__main__':
