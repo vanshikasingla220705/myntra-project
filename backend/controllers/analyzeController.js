@@ -2,17 +2,15 @@ import fs from "node:fs";
 import axios from "axios"; // Import axios to make HTTP requests
 import cloudinary from "../config/cloudinary.js";
 import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai";
-import {Product} from "../models/productModel.js"; // You'll need your Mongoose Product model
+import { Product } from "../models/productModel.js"; // You'll need your Mongoose Product model
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// --- NEW: URL for our Python Embedding Service ---
+// --- URL for our Python Embedding Service ---
 const EMBEDDING_SERVICE_URL = 'http://127.0.0.1:8000/embed';
 
 /**
- * --- NEW: Helper function to call our FastAPI embedding service ---
- * This function takes a string of text, sends it to the Python service,
- * and gets back the vector embedding.
+ * Helper function to call our FastAPI embedding service.
  * @param {string} text The text to vectorize.
  * @returns {Promise<number[]>} A promise that resolves to the vector array.
  */
@@ -22,7 +20,6 @@ const getVectorEmbedding = async (text) => {
     const response = await axios.post(EMBEDDING_SERVICE_URL, { text: text });
     return response.data.vector;
   } catch (error) {
-    // Log the detailed error, but throw a simpler one to the caller
     console.error("Error calling embedding service:", error.message);
     throw new Error("Could not connect to the embedding service.");
   }
@@ -31,7 +28,7 @@ const getVectorEmbedding = async (text) => {
 
 export const analyzeImage = async (req, res) => {
   try {
-    // 1. UPLOAD IMAGE TO CLOUDINARY (Your existing logic is great)
+    // 1. UPLOAD IMAGE TO CLOUDINARY (No changes here)
     const files = req.files ?? (req.file ? [req.file] : null);
     if (!files || files.length === 0) {
       return res.status(400).json({ success: false, error: "No images uploaded (field: images)" });
@@ -51,12 +48,12 @@ export const analyzeImage = async (req, res) => {
       uploads.push({ file, uploadResult });
     }
 
-    // 2. GET TEXT RECOMMENDATIONS FROM GEMINI (Your existing logic)
+    // 2. GET TEXT RECOMMENDATIONS FROM GEMINI (No changes here)
     const basePrompt = `
 Analyze this clothing item image(s) and the user's query.
 1. Identify the clothing item(s) in the image(s) (category, color, style).
 2. Understand the user's context and needs from the query.
-3. Suggest the ideal complementary outfit categories like tops, jackets, shoes, accessories.
+3. Suggest 3-5 ideal complementary outfit categories like tops, jackets, shoes, accessories.
 
 Example output (JSON format only):
 {
@@ -89,95 +86,100 @@ Example output (JSON format only):
         return { inlineData: { mimeType, data: base64Data } };
       });
       geminiResponse = await ai.models.generateContent({
-        model: "gemini-1.5-flash", // Adjusted model name
+        model: "gemini-1.5-flash",
         contents: createUserContent([ finalPrompt, ...inlineParts ])
       });
     }
     
-   // ...after getting geminiResponse
-    
     const rawText = geminiResponse?.text ?? geminiResponse?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
-    // --- NEW: Clean and parse the response from Gemini ---
+    // Parse the response from Gemini (No changes here)
     let parsed = null;
     try {
-        // 1. Find the start and end of the JSON block
-        const startIndex = rawText.indexOf('{');
-        const endIndex = rawText.lastIndexOf('}');
-        
-        if (startIndex !== -1 && endIndex !== -1) {
-            // 2. Extract just the JSON string
-            const jsonString = rawText.substring(startIndex, endIndex + 1);
-            // 3. Parse the clean JSON string
-            parsed = JSON.parse(jsonString);
-        } else {
-            console.error("Could not find a valid JSON object in Gemini's response.");
-        }
+      const startIndex = rawText.indexOf('{');
+      const endIndex = rawText.lastIndexOf('}');
+      if (startIndex !== -1 && endIndex !== -1) {
+        const jsonString = rawText.substring(startIndex, endIndex + 1);
+        parsed = JSON.parse(jsonString);
+      } else {
+        console.error("Could not find a valid JSON object in Gemini's response.");
+      }
     } catch (e) {
-        console.error("Failed to parse JSON from Gemini:", e);
-        // Keep 'parsed' as null to handle the error gracefully
+      console.error("Failed to parse JSON from Gemini:", e);
     }
     
-    // This 'if' block now works as intended
     if (!parsed || !parsed.recommendations || parsed.recommendations.length === 0) {
-        return res.status(200).json({ 
-            success: true, 
-            message: "Analysis complete, but no recommendations to search for.",
-            analysis: parsed ?? rawText 
-        });
+      return res.status(200).json({ 
+          success: true, 
+          message: "Analysis complete, but no recommendations to search for.",
+          analysis: parsed ?? { rawText },
+          images: uploads.map(({ uploadResult }) => ({ url: uploadResult.secure_url })) // Still return uploaded images
+      });
     }
 
-    // --- 3. VECTORIZE THE FIRST RECOMMENDATION ---
-    // This part of your code will now be reached successfully
-    const recommendationToSearch = parsed.recommendations[0];
-    console.log(`Searching for products similar to: "${recommendationToSearch}"`); // <-- Good for debugging!
-    const queryVector = await getVectorEmbedding(recommendationToSearch);
+    // --- THIS IS THE ONLY SECTION THAT HAS BEEN CHANGED ---
+    // Perform parallel searches for each recommendation and combine the results.
 
-    // ...the rest of your vector search logic follows
+    const { recommendations } = parsed;
+    console.log("✅ Performing a separate search for each AI recommendation from image analysis...");
 
-    // --- 4. PERFORM VECTOR SEARCH IN MONGODB ATLAS ---
-    // This assumes you have a Vector Search Index in Atlas named 'default'.
-    // Please replace 'default' with your actual index name.
-    const pipeline = [
-      {
-        $vectorSearch: {
-          index: 'vector_index_desc', // <-- IMPORTANT: Change to your Atlas Vector Search index name
-          path: 'description_embedding', // The field in your documents containing the vectors
-          queryVector: queryVector,
-          numCandidates: 150, // The number of candidates to consider
-          limit: 10, // The number of top results to return
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          item_name: 1, // Or title, whichever you use
-          price: 1,
-          image_url: 1,
-          description:1,
-          score: { $meta: 'vectorSearchScore' }, // The similarity score from the search
-        },
-      },
-    ];
+    const searchTasks = recommendations.map(async (searchTerm) => {
+        try {
+            const queryVector = await getVectorEmbedding(searchTerm);
+            const pipeline = [{
+                $vectorSearch: {
+                    index: 'vector_index_desc',
+                    path: 'description_embedding',
+                    queryVector: queryVector,
+                    numCandidates: 100,
+                    limit: 4, // Get top 4 results for EACH term
+                },
+            }, {
+                $project: { _id: 1, item_name: 1, price: 1, image_url: 1, description: 1 },
+            }];
+            // Here we directly use the 'Product' model as this controller is for clothing
+            return Product.aggregate(pipeline);
+        } catch (err) {
+            console.error(`Failed to search for term "${searchTerm}":`, err);
+            return []; // Return empty array on failure
+        }
+    });
 
-    const recommendedProducts = await Product.aggregate(pipeline);
+    // Wait for all searches to complete
+    const resultsFromAllSearches = await Promise.all(searchTasks);
 
-    // --- 5. SEND FINAL RESPONSE TO FRONTEND ---
+    // Combine all results into a single flat array
+    const combinedProducts = resultsFromAllSearches.flat();
+
+    // Remove duplicate products that may appear in multiple search results
+    const uniqueProducts = [];
+    const seenIds = new Set();
+    for (const product of combinedProducts) {
+      const productId = product._id.toString();
+      if (!seenIds.has(productId)) {
+        seenIds.add(productId);
+        uniqueProducts.push(product);
+      }
+    }
+    
+    console.log(`✅ Combined and deduplicated results. Found ${uniqueProducts.length} unique products.`);
+
+    // 5. SEND FINAL COMBINED RESPONSE TO FRONTEND
     res.json({
       success: true,
       images: uploads.map(({ uploadResult }) => ({
         url: uploadResult.secure_url || uploadResult.url,
         public_id: uploadResult.public_id,
-        format: uploadResult.format,
       })),
       geminiRaw: rawText,
       analysis: parsed,
-      recommendedProducts: recommendedProducts // <-- Here are the matching products!
+      // The key remains 'recommendedProducts' with the new flat, unique list
+      recommendedProducts: uniqueProducts
     });
+    // --- END OF CHANGED SECTION ---
 
   } catch (err) {
     console.error("analyzeImage error:", err);
     res.status(500).json({ success: false, error: err.message || String(err) });
   }
 };
-

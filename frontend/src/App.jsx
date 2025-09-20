@@ -6,6 +6,8 @@ import RecommendationsPage from './pages/RecommendationsPage';
 import MixAndMatchStudio from './pages/MixAndMatchStudio';
 import CartStylingPage from './pages/CartStylingPage';
 import DesignStudio from './DesignStudio';
+import ContestPage from './pages/ContestPage';
+
 function App() {
   return (
     <div className="App">
@@ -18,6 +20,7 @@ function App() {
           <Route path="/recommendations" element={<RecommendationsPage />} />
           <Route path="/mix-and-match" element={<MixAndMatchStudio />} />
           <Route path="/cart-styling" element={<CartStylingPage />} />
+          <Route path="/contest" element={<ContestPage />}/>
         </Routes>
       </main>
     </div>

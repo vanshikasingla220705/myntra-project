@@ -57,13 +57,17 @@ const Navbar = () => {
           <button onClick={() => setDropdownOpen(!dropdownOpen)} className="profile-btn">
             Profile
           </button>
+         
           {dropdownOpen && (
             <div className="dropdown-content">
               <p>Personalised Shopping</p>
               <Link to="/clothing-analyzer" onClick={() => setDropdownOpen(false)}>Clothing</Link>
               <Link to="/decor-analyzer" onClick={() => setDropdownOpen(false)}>Decor</Link>
+              <hr style={{ margin: '8px 0', border: 'none', borderTop: '1px solid var(--border-color)' }} />
+              <Link to="/contest" onClick={() => setDropdownOpen(false)}>Style Contest</Link> {/* <-- ADD THIS LINE */}
             </div>
           )}
+
         </div>
       </div>
     </nav>

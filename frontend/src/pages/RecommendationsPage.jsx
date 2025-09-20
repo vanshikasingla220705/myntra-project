@@ -48,6 +48,7 @@ const RecommendationsPage = () => {
 
   return (
     <div className="recommendations-container">
+      {/* --- THIS IS THE CORRECTED SECTION --- */}
       {images && images.length > 0 && (
         <div className="uploaded-image-section">
           <h2>Your Item</h2>
@@ -64,16 +65,36 @@ const RecommendationsPage = () => {
           )}
         </div>
       )}
+      {/* --- END OF CORRECTED SECTION --- */}
 
-      <h2>AI Recommendations</h2>
-      {recommendedProducts && recommendedProducts.length > 0 ? (
-        <div className="recommendations-grid">
-          {recommendedProducts.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
+      {/* Logic for displaying grouped results */}
+      {groupedResults && groupedResults.length > 0 ? (
+        groupedResults.map((group, index) => (
+          group.products.length > 0 && (
+            <div key={index} className="recommendation-group">
+              <h2 className="group-title">
+                Recommendations for "{group.searchTerm}"
+              </h2>
+              <div className="recommendations-grid">
+                {group.products.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
+            </div>
+          )
+        ))
+      // Fallback logic for displaying flat list of results
+      ) : recommendedProducts && recommendedProducts.length > 0 ? (
+        <div className="recommendation-group">
+          <h2 className="group-title">AI Recommendations</h2>
+          <div className="recommendations-grid">
+            {recommendedProducts.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
         </div>
       ) : (
-        <p className="info-message">{searchResults.message || "No products found matching the recommendations."}</p>
+        <p className="info-message">{searchResults.message || "No products found."}</p>
       )}
     </div>
   );
