@@ -114,15 +114,22 @@ Example output (JSON format only):
 
     // 5. PERFORM VECTOR SEARCH IN THE DECOR COLLECTION
     const pipeline = [
-      {
-        $search: {
-          index: 'vector_index_desc',
-          path: 'description_embedding',
-          queryVector: queryVector,
-          numCandidates: 150,
-          limit: 10,
-        },
+       {
+    // The top-level operator MUST be named "$search"
+    $search: {
+      // Use the correct index name for your clothing 'Product' collection
+      index: "vector_index_desc", 
+      
+      // The "vectorSearch" object goes inside "$search"
+      vectorSearch: {
+        // Use the field name that contains vectors in your 'Product' collection
+        path: "description_embedding", 
+        queryVector: queryVector,
+        numCandidates: 150,
+        limit: 15,
       },
+    },
+  },
       {
         $project: {
           _id: 1,

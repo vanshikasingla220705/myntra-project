@@ -126,15 +126,22 @@ Example output (JSON format only):
     const searchTasks = recommendations.map(async (searchTerm) => {
         try {
             const queryVector = await getVectorEmbedding(searchTerm);
-            const pipeline = [{
-                $search: {
-                    index: 'vector_index_desc',
-                    path: 'description_embedding',
-                    queryVector: queryVector,
-                    numCandidates: 100,
-                    limit: 4, // Get top 4 results for EACH term
-                },
-            }, {
+            const pipeline = [ {
+    // The top-level operator MUST be named "$search"
+    $search: {
+      // Use the correct index name for your clothing 'Product' collection
+      index: "vector_index_desc", 
+      
+      // The "vectorSearch" object goes inside "$search"
+      vectorSearch: {
+        // Use the field name that contains vectors in your 'Product' collection
+        path: "description_embedding", 
+        queryVector: queryVector,
+        numCandidates: 150,
+        limit: 15,
+      },
+    },
+  }, {
                 $project: { _id: 1, item_name: 1, price: 1, image_url: 1, description: 1 },
             }];
             // Here we directly use the 'Product' model as this controller is for clothing
