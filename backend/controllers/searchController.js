@@ -7,7 +7,7 @@ import { Decor } from "../models/decorModel.js";     // Your Mongoose model for 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // The embedding helper function remains the same
-const EMBEDDING_SERVICE_URL = 'http://127.0.0.1:8000/embed';
+const EMBEDDING_SERVICE_URL =process.env.EMBEDDING_SERVICE_URL;
 
 const getVectorEmbedding = async (text) => {
   try {
