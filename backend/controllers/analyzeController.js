@@ -127,7 +127,7 @@ Example output (JSON format only):
         try {
             const queryVector = await getVectorEmbedding(searchTerm);
             const pipeline = [{
-                $vectorSearch: {
+                $search: {
                     index: 'vector_index_desc',
                     path: 'description_embedding',
                     queryVector: queryVector,

@@ -115,7 +115,7 @@ Example output (JSON format only):
     // 5. PERFORM VECTOR SEARCH IN THE DECOR COLLECTION
     const pipeline = [
       {
-        $vectorSearch: {
+        $search: {
           index: 'vector_index_desc',
           path: 'description_embedding',
           queryVector: queryVector,
@@ -130,7 +130,7 @@ Example output (JSON format only):
           price: 1,
           image_url: 1,
           description: 1,
-          score: { $meta: 'vectorSearchScore' },
+          score: { $meta: 'searchScore' },
         },
       },
     ];
