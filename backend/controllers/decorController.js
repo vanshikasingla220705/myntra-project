@@ -5,7 +5,7 @@ import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai
 import { Decor } from "../models/decorModel.js"; // Import your Decor model
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const EMBEDDING_SERVICE_URL = 'http://127.0.0.1:8000/embed';
+const EMBEDDING_SERVICE_URL=process.env.EMBEDDING_SERVICE_URL;
 
 // Helper function to get vector embeddings
 const getVectorEmbedding = async (text) => {
