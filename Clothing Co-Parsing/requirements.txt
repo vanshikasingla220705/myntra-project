@@ -1,3 +1,4 @@
+gradio
 flask
 gunicorn
 torch
