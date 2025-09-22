@@ -93,6 +93,12 @@ Get more value out of every purchase. Our AI analyzes the items in your cart and
     .\venv\Scripts\activate
      python app.py
    ```
+   ## 🧠 Pre-trained Model
+
+This project requires the pre-trained weights for the Clothing Co-Parsing model. Please download the `.pth` file from the link below and place it in the `Clothing Co-Parsing` directory of your project.
+
+[![Download Model Weights](https://img.shields.io/badge/Download-Model%20Weights-blue?style=for-the-badge&logo=googledrive)](https://drive.google.com/file/d/1d6Q_YBHurmwAHo_jUuR-Fr18vsuJPoYe/view?usp=sharing)
+
 ---
 ## 🛠️ Technology Stack
 
