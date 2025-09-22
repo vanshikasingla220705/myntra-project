@@ -45,7 +45,7 @@ class TextInput(BaseModel):
 # --- 4. Create the API Endpoint ---
 # This decorator tells FastAPI to create an endpoint that listens for
 # POST requests at the path '/embed'.
-@app.post("/embed")
+@app.post("/embed/")
 def get_embedding(text_input: TextInput):
     """
     Receives text input and returns its vector embedding.

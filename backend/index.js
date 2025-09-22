@@ -9,18 +9,18 @@ dotenv.config();
 import multer from "multer"
 import axios from "axios"
 import FormData from 'form-data';
-const PYTHON_API_URL = process.env.SEGMENTATION_SERVICE_URL;
+const PYTHON_API_URL = 'http://localhost:8001';
 const memoryUpload = multer({ storage: multer.memoryStorage() });
 // --- 2. CALL THE CONNECTION FUNCTION ---
 connectDB();
 // ------------------------------------
 
 const app = express();
-const corsOptions = {
-  origin: 'https://myntra-project-3.onrender.com', // Your frontend URL
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//   origin: 'http://localhost:5173', // Your frontend URL
+//   optionsSuccessStatus: 200
+// };
+app.use(cors);
 app.use(express.json());
 
 // Routes
