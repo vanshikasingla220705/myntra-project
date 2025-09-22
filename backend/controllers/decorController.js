@@ -2,20 +2,79 @@ import fs from "node:fs";
 import axios from "axios";
 import cloudinary from "../config/cloudinary.js";
 import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai";
-import { Decor } from "../models/decorModel.js"; // Import your Decor model
+import { Decor } from "../models/decorModel.js";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const EMBEDDING_SERVICE_URL=process.env.EMBEDDING_SERVICE_URL;
+const EMBEDDING_SERVICE_URL = process.env.EMBEDDING_SERVICE_URL;
 
 // Helper function to get vector embeddings
 const getVectorEmbedding = async (text) => {
   try {
-    console.log(`Requesting embedding for: "${text}"`);
-    const response = await axios.post(EMBEDDING_SERVICE_URL, { text: text });
-    return response.data.vector;
+    console.log(`Requesting embedding for (Gradio): "${text}"`);
+
+    // Step 1: Initiate the Gradio API call
+    const initiateResponse = await axios.post(`${EMBEDDING_SERVICE_URL}/gradio_api/call/generate_embedding`, {
+      data: [text]
+    });
+
+    // Extract the event ID from the response
+    const eventId = initiateResponse.data?.event_id;
+    if (!eventId) {
+      throw new Error("No event ID received from Gradio API");
+    }
+
+    // Step 2: Poll for the result using the event ID
+    const resultResponse = await axios.get(`${EMBEDDING_SERVICE_URL}/gradio_api/call/generate_embedding/${eventId}`);
+
+    // Parse the SSE format response
+    const sseData = resultResponse.data;
+    
+    // The response comes in SSE format: "event: complete\ndata: [...]"
+    // We need to extract the JSON data after "data: "
+    let jsonData;
+    if (typeof sseData === 'string') {
+      // Parse SSE format
+      const lines = sseData.split('\n');
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.substring(6); // Remove "data: " prefix
+          try {
+            jsonData = JSON.parse(dataStr);
+            break;
+          } catch (e) {
+            console.error("Failed to parse SSE data:", e);
+          }
+        }
+      }
+    } else {
+      // If it's already parsed JSON
+      jsonData = sseData;
+    }
+
+    // Extract the vector from the parsed data
+    let vector;
+    if (Array.isArray(jsonData) && jsonData[0]?.vector) {
+      vector = jsonData[0].vector;
+    } else if (jsonData?.data?.[0]?.vector) {
+      vector = jsonData.data[0].vector;
+    } else {
+      console.error("Could not find vector in response:", jsonData);
+      throw new Error("Could not extract vector from Gradio response");
+    }
+
+    // Final check to ensure the vector is valid
+    if (!Array.isArray(vector)) {
+      console.error("Invalid vector from Gradio service:", vector);
+      throw new Error("Gradio API did not return a valid vector array.");
+    }
+
+    return vector;
+
   } catch (error) {
-    console.error("Error calling embedding service:", error.message);
-    throw new Error("Could not connect to the embedding service.");
+    console.error("Error calling Gradio embedding service:", error.message);
+    throw new Error(
+      "Could not get a valid response from the embedding service."
+    );
   }
 };
 
@@ -115,15 +174,7 @@ Example output (JSON format only):
     // 5. PERFORM VECTOR SEARCH IN THE DECOR COLLECTION
     const pipeline = [
        {
-    // The top-level operator MUST be named "$search"
-    
-      // Use the correct index name for your clothing 'Product' collection
-      
-      
-      // The "vectorSearch" object goes inside "$search"
       $vectorSearch: {
-        // Use the field name that contai
-        // ns vectors in your 'Product' collection
         index: "vector_index_desc", 
         path: "description_embedding", 
         queryVector: queryVector,
@@ -131,7 +182,6 @@ Example output (JSON format only):
         limit: 6,
       },
     },
-  
       {
         $project: {
           _id: 1,
