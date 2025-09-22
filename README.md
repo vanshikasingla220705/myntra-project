@@ -6,7 +6,13 @@
 An innovative solution for the **Myntra "HackerRamp WeForShe" hackathon**, designed to bring the experience of a personal stylist to every user's fingertips. Using cutting-edge Generative AI, Computer Vision, and multi-modal search, our mission is to make online shopping deeply personal, intuitive, and confidence-boosting.
 
 ---
+## 🚀 Demo Video
 
+Check out this quick video to see Myntra StyleVerse in action!
+
+[![Myntra StyleVerse Demo Video]](https://drive.google.com/drive/folders/1V58k-_K-Oq-seb-7wou0gVRbS8F6pudf?usp=drive_link)
+
+---
 ## 🚀 Key Features
 
 ### 👗 1. AI Look Curator
@@ -60,7 +66,34 @@ Get more value out of every purchase. Our AI analyzes the items in your cart and
 
 
 ---
+## 🚀 Getting Started
 
+1.  **Clone the repo**
+2.  **Install backend dependencies**
+    ```sh
+    cd backend
+    npm i
+    npm run dev
+    ```
+3.  **Install frontend dependencies**
+    ```sh
+    cd frontend
+    npm install
+    npm run dev
+    ```
+4.  **Run the embedding-service**
+    ```sh
+    python -m venv venv
+    .\venv\Scripts\activate
+    uvicorn main:app --reload
+    ```
+5. **Run the Clothing Co-Parsing**
+   ```sh
+     python -m venv venv
+    .\venv\Scripts\activate
+     python app.py
+   ```
+---
 ## 🛠️ Technology Stack
 
 | Category          | Technologies Used                                                              |
