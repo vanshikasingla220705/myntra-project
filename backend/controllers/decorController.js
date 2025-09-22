@@ -5,7 +5,7 @@ import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai
 import { Decor } from "../models/decorModel.js"; // Import your Decor model
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const EMBEDDING_SERVICE_URL=process.env.EMBEDDING_SERVICE_URL;
+const EMBEDDING_SERVICE_URL="http://127.0.0.1:8000/embed";
 
 // Helper function to get vector embeddings
 const getVectorEmbedding = async (text) => {
@@ -116,20 +116,22 @@ Example output (JSON format only):
     const pipeline = [
        {
     // The top-level operator MUST be named "$search"
-    $search: {
+    
       // Use the correct index name for your clothing 'Product' collection
-      index: "vector_index_desc", 
+      
       
       // The "vectorSearch" object goes inside "$search"
-      vectorSearch: {
-        // Use the field name that contains vectors in your 'Product' collection
+      $vectorSearch: {
+        // Use the field name that contai
+        // ns vectors in your 'Product' collection
+        index: "vector_index_desc", 
         path: "description_embedding", 
         queryVector: queryVector,
         numCandidates: 150,
         limit: 15,
       },
     },
-  },
+  
       {
         $project: {
           _id: 1,

@@ -16,11 +16,11 @@ connectDB();
 // ------------------------------------
 
 const app = express();
-const corsOptions = {
-  origin: 'https://myntra-project-3.onrender.com', // Your frontend URL
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//   origin: 'https://myntra-project-3.onrender.com', // Your frontend URL
+//   optionsSuccessStatus: 200
+// };
+app.use(cors());
 app.use(express.json());
 
 // Routes

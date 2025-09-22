@@ -7,7 +7,7 @@ import { Product } from "../models/productModel.js"; // You'll need your Mongoos
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // --- URL for our Python Embedding Service ---
-const EMBEDDING_SERVICE_URL = process.env.EMBEDDING_SERVICE_URL;
+const EMBEDDING_SERVICE_URL = "http://127.0.0.1:8000/embed";
 
 /**
  * Helper function to call our FastAPI embedding service.
@@ -128,12 +128,13 @@ Example output (JSON format only):
             const queryVector = await getVectorEmbedding(searchTerm);
             const pipeline = [ {
     // The top-level operator MUST be named "$search"
-    $search: {
+    
       // Use the correct index name for your clothing 'Product' collection
-      index: "vector_index_desc", 
+       
       
       // The "vectorSearch" object goes inside "$search"
-      vectorSearch: {
+      $vectorSearch: {
+        index: "vector_index_desc",
         // Use the field name that contains vectors in your 'Product' collection
         path: "description_embedding", 
         queryVector: queryVector,
@@ -141,7 +142,7 @@ Example output (JSON format only):
         limit: 15,
       },
     },
-  }, {
+   {
                 $project: { _id: 1, item_name: 1, price: 1, image_url: 1, description: 1 },
             }];
             // Here we directly use the 'Product' model as this controller is for clothing
