@@ -66,7 +66,34 @@ Get more value out of every purchase. Our AI analyzes the items in your cart and
 
 
 ---
+## 🚀 Getting Started
 
+1.  **Clone the repo**
+2.  **Install backend dependencies**
+    ```sh
+    cd backend
+    npm i
+    npm run dev
+    ```
+3.  **Install frontend dependencies**
+    ```sh
+    cd frontend
+    npm install
+    npm run dev
+    ```
+4.  **Run the embedding-service**
+    ```sh
+    python -m venv venv
+    .\venv\Scripts\activate
+    uvicorn main:app --reload
+    ```
+5. **Run the Clothing Co-Parsing**
+   ```sh
+     python -m venv venv
+    .\venv\Scripts\activate
+     python app.py
+   ```
+---
 ## 🛠️ Technology Stack
 
 | Category          | Technologies Used                                                              |
