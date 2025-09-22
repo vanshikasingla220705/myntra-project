@@ -7,7 +7,7 @@ dotenv.config(); // Load environment variables from a .env file
 
 // --- CONFIGURATION ---
 const MONGO_URI = process.env.MONGODB_API_KEY; // Your MongoDB connection string
-const EMBEDDING_SERVICE_URL = 'http://127.0.0.1:8000/embed'; // The URL of your running Python service
+const EMBEDDING_SERVICE_URL = process.env.EMBEDDING_SERVICE_URL; // The URL of your running Python service
 
 /**
  * Helper function to call the FastAPI embedding service.
@@ -21,6 +21,7 @@ const getVectorEmbedding = async (text) => {
   }
   try {
     const response = await axios.post(EMBEDDING_SERVICE_URL, { text });
+     console.log("Embedding response:", response.data);
     return response.data.vector;
   } catch (error) {
     console.error(`Error getting embedding for "${text}": ${error.message}`);
