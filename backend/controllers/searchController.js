@@ -155,7 +155,6 @@ Example output 2 (JSON format only):
       }
     }
     
-    
     console.log(`✅ Combined and deduplicated results. Found ${uniqueProducts.length} unique products.`);
 
     // 5. SEND THE FINAL COMBINED RESPONSE
