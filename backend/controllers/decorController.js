@@ -128,7 +128,7 @@ Example output (JSON format only):
         path: "description_embedding", 
         queryVector: queryVector,
         numCandidates: 150,
-        limit: 15,
+        limit: 6,
       },
     },
   

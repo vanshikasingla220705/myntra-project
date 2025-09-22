@@ -138,8 +138,8 @@ Example output (JSON format only):
         // Use the field name that contains vectors in your 'Product' collection
         path: "description_embedding", 
         queryVector: queryVector,
-        numCandidates: 150,
-        limit: 15,
+        numCandidates: 100,
+        limit: 6,
       },
     },
    {

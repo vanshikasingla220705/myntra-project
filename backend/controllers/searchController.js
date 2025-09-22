@@ -124,8 +124,8 @@ Example output 2 (JSON format only):
                 index: "vector_index_desc",
                 path: "description_embedding",
                 queryVector: queryVector,
-                numCandidates: 150,
-                limit: 15,
+                numCandidates:200,
+                limit: 6,
             },
         }, {
                 $project: { _id: 1, item_name: 1, price: 1, image_url: 1, description: 1 },
