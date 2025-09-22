@@ -6,7 +6,13 @@
 An innovative solution for the **Myntra "HackerRamp WeForShe" hackathon**, designed to bring the experience of a personal stylist to every user's fingertips. Using cutting-edge Generative AI, Computer Vision, and multi-modal search, our mission is to make online shopping deeply personal, intuitive, and confidence-boosting.
 
 ---
+## 🚀 Demo Video
 
+Check out this quick video to see Myntra StyleVerse in action!
+
+[![Myntra StyleVerse Demo Video]](https://drive.google.com/drive/folders/1V58k-_K-Oq-seb-7wou0gVRbS8F6pudf?usp=drive_link)
+
+---
 ## 🚀 Key Features
 
 ### 👗 1. AI Look Curator
