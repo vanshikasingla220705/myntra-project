@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'; // Import useEffect
+import React, { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { Stage, Layer, Image as KonvaImage } from 'react-konva';
 import useImage from 'use-image';
@@ -22,14 +22,14 @@ function DesignStudio() {
   const clothingOptions = ['top', 'bottom', 'skirt', 'coord', 'kurta', 'lehenga'];
   const [isOverUploader, setIsOverUploader] = useState(false);
 
-  // --- (No changes to the functions below this line) ---
   const segmentAndAddItem = useCallback(async (file, itemCategory, dropPosition = { x: 100, y: 100 }) => {
     setIsLoading(true);
     setError('');
     try {
       const formData = new FormData();
-      formData.append('file', file);
-      const segmentResponse = await axios.post(`http://localhost:8001/segment/${itemCategory}`, formData, {
+      formData.append('image', file);
+      // CORRECTED URL with /api prefix
+      const segmentResponse = await axios.post(`http://localhost:5000/api/segment/${itemCategory}`, formData, {
         responseType: 'blob',
       });
       const segmentedUrl = URL.createObjectURL(segmentResponse.data);
@@ -46,7 +46,7 @@ function DesignStudio() {
       };
     } catch (err) {
       console.error("Segmentation failed:", err);
-      setError('Failed to segment item. Is the backend server running on port 8001?');
+      //setError('Failed to segment item. Is the backend server running?');
     } finally {
       setIsLoading(false);
     }
@@ -72,34 +72,66 @@ function DesignStudio() {
     e.preventDefault();
     setIsOverUploader(false);
     setError('');
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (file.type.startsWith('image/')) {
-        segmentAndAddItem(file, clothingType);
-      } else {
-        setError('Please drop an image file (PNG, JPG, etc.).');
-      }
-      e.dataTransfer.clearData();
-      return;
+
+    // 1. CHECK FOR INTERNAL DRAG DATA FIRST
+    const internalDataString = e.dataTransfer.getData('application/my-app-data');
+    if (internalDataString) {
+        const internalData = JSON.parse(internalDataString);
+        const imageUrl = internalData.src;
+        const imageType = internalData.type;
+
+        setIsLoading(true);
+        try {
+            const proxyUrl = `http://localhost:5000/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error('Failed to fetch internal image via backend.');
+            
+            const imageBlob = await response.blob();
+            const imageFile = new File([imageBlob], "dropped-image.png", { type: imageBlob.type });
+            
+            segmentAndAddItem(imageFile, imageType); 
+        } catch (err) {
+            console.error("Error fetching internal image:", err);
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+        return;
     }
+
+    // 2. CHECK FOR FILES FROM DESKTOP
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (file.type.startsWith('image/')) {
+            segmentAndAddItem(file, clothingType);
+        } else {
+            setError('Please drop an image file (PNG, JPG, etc.).');
+        }
+        e.dataTransfer.clearData();
+        return;
+    }
+
+    // 3. CHECK FOR EXTERNAL URLS
     const url = e.dataTransfer.getData('text/uri-list');
     if (url) {
-      setIsLoading(true);
-      try {
-        const proxyUrl = `http://localhost:8001/proxy-image?url=${encodeURIComponent(url)}`;
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error('Failed to fetch image from URL via backend.');
-        const imageBlob = await response.blob();
-        const imageFile = new File([imageBlob], "dropped-image.png", { type: imageBlob.type });
-        segmentAndAddItem(imageFile, clothingType);
-      } catch (err) {
-        console.error("Error fetching dropped image:", err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-      return;
+        setIsLoading(true);
+        try {
+            // CORRECTED URL with /api prefix
+            const proxyUrl = `http://localhost:5000/api/proxy-image?url=${encodeURIComponent(url)}`;
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error('Failed to fetch image from URL via backend.');
+            const imageBlob = await response.blob();
+            const imageFile = new File([imageBlob], "dropped-image.png", { type: imageBlob.type });
+            segmentAndAddItem(imageFile, clothingType);
+        } catch (err) {
+            console.error("Error fetching dropped image:", err);
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+        return;
     }
+
     setError("Could not find a valid image file or URL in the dropped item.");
   }, [segmentAndAddItem, clothingType]);
 
@@ -110,16 +142,13 @@ function DesignStudio() {
     }
   };
 
-  // --- 1. ADD THE DELETE FUNCTION ---
   const handleDeleteItem = () => {
-    if (!selectedId) return; // Do nothing if nothing is selected
-    // Create a new array excluding the selected item
+    if (!selectedId) return;
     const newItems = items.filter((item) => item.id !== selectedId);
     setItems(newItems);
-    selectShape(null); // Deselect after deleting
+    selectShape(null);
   };
 
-  // --- 2. ADD KEYBOARD DELETE FUNCTIONALITY ---
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
@@ -127,11 +156,10 @@ function DesignStudio() {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    // Cleanup the event listener when the component unmounts
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedId, items]); // Rerun effect if selectedId or items change
+  }, [selectedId, items, handleDeleteItem]); // Added handleDeleteItem to dependencies
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif', display: 'flex', gap: '20px' }}>
@@ -161,8 +189,6 @@ function DesignStudio() {
             {isLoading ? 'Processing...' : 'Add to Studio'}
           </button>
           
-          {/* --- 3. ADD THE DELETE BUTTON TO THE UI --- */}
-          {/* This button will only appear when an item is selected */}
           {selectedId && (
             <button 
               onClick={handleDeleteItem} 
@@ -187,8 +213,8 @@ function DesignStudio() {
       <div style={{ border: '2px solid black' }}>
         <Stage width={400} height={600} onMouseDown={checkDeselect} onTouchStart={checkDeselect} onDragOver={handleDragOver} onDrop={handleCanvasDrop}>
           <Layer>
-             <Background />
-             {items.map((item) => ( <ClothingItem key={item.id} shapeProps={item} isSelected={item.id === selectedId} onSelect={() => selectShape(item.id)} onChange={(newAttrs) => { const newItems = items.slice(); const index = items.findIndex(i => i.id === item.id); newItems[index] = newAttrs; setItems(newItems); }} /> ))}
+              <Background />
+              {items.map((item) => ( <ClothingItem key={item.id} shapeProps={item} isSelected={item.id === selectedId} onSelect={() => selectShape(item.id)} onChange={(newAttrs) => { const newItems = items.slice(); const index = items.findIndex(i => i.id === item.id); newItems[index] = newAttrs; setItems(newItems); }} /> ))}
           </Layer>
         </Stage>
       </div>

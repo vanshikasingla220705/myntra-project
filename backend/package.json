@@ -22,6 +22,10 @@
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
     "multer": "^2.0.2",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "sharp": "^0.34.4"
+  },
+  "devDependencies": {
+    "@gradio/client": "^1.19.0"
   }
 }
