@@ -29,7 +29,7 @@ function DesignStudio() {
       const formData = new FormData();
       formData.append('image', file);
       // CORRECTED URL with /api prefix
-      const segmentResponse = await axios.post(`http://localhost:5000/api/segment/${itemCategory}`, formData, {
+      const segmentResponse = await axios.post(`https://myntra-project-5.onrender.com/api/segment/${itemCategory}`, formData, {
         responseType: 'blob',
       });
       const segmentedUrl = URL.createObjectURL(segmentResponse.data);
@@ -82,7 +82,7 @@ function DesignStudio() {
 
         setIsLoading(true);
         try {
-            const proxyUrl = `http://localhost:5000/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+            const proxyUrl = `https://myntra-project-5.onrender.com/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
             const response = await fetch(proxyUrl);
             if (!response.ok) throw new Error('Failed to fetch internal image via backend.');
             
@@ -117,7 +117,7 @@ function DesignStudio() {
         setIsLoading(true);
         try {
             // CORRECTED URL with /api prefix
-            const proxyUrl = `http://localhost:5000/api/proxy-image?url=${encodeURIComponent(url)}`;
+            const proxyUrl = `https://myntra-project-5.onrender.com/api/proxy-image?url=${encodeURIComponent(url)}`;
             const response = await fetch(proxyUrl);
             if (!response.ok) throw new Error('Failed to fetch image from URL via backend.');
             const imageBlob = await response.blob();
