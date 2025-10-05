@@ -128,8 +128,8 @@ Our Myntra StyleVerse platform is built on a robust and scalable architecture, l
         * **CLIP Model:** Utilized for multi-modal embeddings (image-text understanding) for visual search and content recommendations.
         * **U-Net Model:** Employed for image segmentation tasks, such as isolating clothing items in the Virtual Mix & Match Studio.
         * **Curation Model:** Powers the AI Look Curator and Smart Cart Stylist, generating outfit suggestions and styling tips.
-    * **Search Database:**
-        * **Vector Database:** Stores high-dimensional vector embeddings enabling efficient semantic search and similarity matching for product recommendations and visual search.
+* **Search Database:**
+         **Vector Database:** Stores high-dimensional vector embeddings enabling efficient semantic search and similarity matching for product recommendations and visual search.
 
 ---
 ## 🛠️ Technology Stack
