@@ -113,7 +113,7 @@ This project requires the pre-trained weights for the Clothing Co-Parsing model.
 
 Our Myntra StyleVerse platform is built on a robust and scalable architecture, leveraging a blend of AI services and modern web technologies to deliver a seamless user experience. The diagram below illustrates the core components and data flow:
 
-![System Architecture Diagram](./screenshots/Untitled diagram _ Mermaid Chart-2025-09-22-064216.png)
+![System Architecture Diagram](./screenshots/architect.png)
 
 ### Architecture Overview:
 
