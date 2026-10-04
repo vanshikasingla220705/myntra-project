@@ -125,7 +125,7 @@ Example output (JSON format only):
         return createPartFromUri(url, mimeType);
       });
       geminiResponse = await ai.models.generateContent({
-        model: "gemini-2.5-flash-lite",
+        model: "gemini-3.8-flash",
         contents: createUserContent([ finalPrompt, ...partsFromUri ])
       });
     } catch (primaryErr) {
@@ -139,7 +139,7 @@ Example output (JSON format only):
         return { inlineData: { mimeType, data: base64Data } };
       });
       geminiResponse = await ai.models.generateContent({
-        model: "gemini-2.5-flash-lite",
+        model: "gemini-3.8-flash",
         contents: createUserContent([ finalPrompt, ...inlineParts ])
       });
     }
