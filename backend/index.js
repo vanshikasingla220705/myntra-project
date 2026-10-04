@@ -1,5 +1,6 @@
+import "dotenv/config";
 import express from "express";
-import dotenv from "dotenv";
+// import dotenv from "dotenv";
 import analyzeRoutes from "./routes/image-understanding.routes.js";
 import decorRoutes from "./routes/decorRoutes.js";
 import searchRoute from "./routes/searchRoute.js";
@@ -11,7 +12,7 @@ import { Client } from "@gradio/client";
 import sharp from 'sharp';
 
 // Load environment variables
-dotenv.config();
+// dotenv.config();
 
 // Connect to the database
 connectDB();
