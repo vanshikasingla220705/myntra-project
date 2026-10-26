@@ -1,2 +1,5 @@
 venv/ 
 *.pth 
+# Environments
+.env
+backend/.env
